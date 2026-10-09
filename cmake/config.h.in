@@ -1,0 +1,34 @@
+/*
+  Standalone configuration header for the procpool library.
+
+  The upstream project generates config.h via autoconf (config.m4) or PHP's phpize.
+  This standalone port only needs the subset of feature macros that the
+  process-pool dependency closure actually references. Values are probed by
+  CMake at configure time (see the cmake/checks section of CMakeLists.txt).
+*/
+
+#pragma once
+
+#define PP_HOST_ALIGN @PP_HOST_ALIGN@
+
+/* ---- IPC ---- */
+#cmakedefine HAVE_MSGQUEUE 1
+#cmakedefine HAVE_SIGNALFD 1
+
+/* ---- reactors ---- */
+#cmakedefine HAVE_EPOLL 1
+#cmakedefine HAVE_KQUEUE 1
+
+/* ---- locks ---- */
+#cmakedefine HAVE_FUTEX 1
+#cmakedefine HAVE_MUTEX_TIMEDLOCK 1
+
+/* ---- os helpers ---- */
+#cmakedefine HAVE_ACCEPT4 1
+#cmakedefine HAVE_ARC4RANDOM 1
+#cmakedefine HAVE_GETRANDOM 1
+#cmakedefine HAVE_MKOSTEMP 1
+#cmakedefine HAVE_FDATASYNC 1
+#cmakedefine HAVE_EXECINFO 1
+#cmakedefine HAVE_MALLOC_TRIM 1
+#cmakedefine HAVE_CCRANDOMGENERATEBYTES 1

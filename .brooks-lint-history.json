@@ -1,0 +1,57 @@
+[
+  {
+    "date": "2026-10-09",
+    "mode": "Full Sweep",
+    "score": 62,
+    "findings": {
+      "critical": 4,
+      "warning": 8,
+      "suggestion": 6
+    },
+    "scope": "entire project (54 source files)"
+  },
+  {
+    "date": "2026-10-09",
+    "mode": "Full Sweep (round 2)",
+    "score": 78,
+    "findings": {
+      "critical": 1,
+      "warning": 4,
+      "suggestion": 5
+    },
+    "scope": "residual fixes: dead fields, IPC unification, wait() refactor, layering"
+  },
+  {
+    "date": "2026-10-09",
+    "mode": "Full Sweep (dead-code final)",
+    "score": 86,
+    "findings": {
+      "critical": 0,
+      "warning": 2,
+      "suggestion": 4
+    },
+    "scope": "exhaustive dead-code removal (~2800 lines)"
+  },
+  {
+    "date": "2026-10-09",
+    "mode": "Full Sweep (round 4)",
+    "score": 90,
+    "findings": {
+      "critical": 0,
+      "warning": 1,
+      "suggestion": 3
+    },
+    "scope": "post-cleanup fresh scan; -264 lines dead code + goto removal + bug fix"
+  },
+  {
+    "date": "2026-10-09",
+    "mode": "Residual fix (R3+R5)",
+    "score": 93,
+    "findings": {
+      "critical": 0,
+      "warning": 0,
+      "suggestion": 3
+    },
+    "scope": "errno classifier unified; include cycles broken"
+  }
+]
