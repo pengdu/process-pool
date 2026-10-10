@@ -49,6 +49,15 @@ private:
   void reopen_without_lock();
 
 public:
+  /**
+   * Choose how log files rotate: PP_LOG_ROTATION_SINGLE (default),
+   * MONTHLY, DAILY, HOURLY or EVERY_MINUTE. Takes effect on the next
+   * open()/reopen().
+   */
+  void set_log_rotation(int mode) {
+    log_rotation_ = mode;
+  }
+
   bool open(const char* logfile);
   void reopen();
   /**

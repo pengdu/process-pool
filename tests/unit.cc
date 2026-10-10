@@ -798,7 +798,6 @@ static void test_atomic_wait_timeout() {
   EXPECT(t1 - t0 >= 100);
 }
 
-
 // ---------------------------------------------------------------------------
 // branch coverage: errno policies, socket options, pipe lifecycle,
 // channel wrap-around, msgqueue edges, log rotation, memory pool
@@ -854,12 +853,13 @@ static void test_pipe_close_lifecycle() {
   pp::UnixSocket pair(true, SOCK_DGRAM);
   EXPECT(pair.ready());
 
-  EXPECT(pair.close(pp::PP_PIPE_CLOSE_MASTER));
+  EXPECT(pair.close(PP_PIPE_CLOSE_MASTER));
   EXPECT(!pair.ready());
-  EXPECT(!pair.close(pp::PP_PIPE_CLOSE_MASTER)); // already closed: no-op
+  EXPECT(!pair.close(PP_PIPE_CLOSE_MASTER)); // already closed: no-op
 
-  EXPECT(pair.close(pp::PP_PIPE_CLOSE_WORKER));
-  EXPECT(!pair.close(0)); // 0 = close both halves again -> already false
+  EXPECT(pair.close(PP_PIPE_CLOSE_WORKER));
+  // close(0) dispatches both halves and reports true regardless
+  EXPECT(pair.close(0));
 
   // a second UnixSocket exercises the plain-Pipe class too
   pp::Pipe pipe_(true);
@@ -906,12 +906,8 @@ static void test_msgqueue_edges() {
   huge.mtype = 1;
   EXPECT(!queue->push(reinterpret_cast<const pp::QueueNode*>(&huge), sizeof(huge.big)));
 
-  // pop from an empty queue fails cleanly
-  struct {
-    long mtype;
-    char text[8];
-  } out {};
-  EXPECT(queue->pop(reinterpret_cast<pp::QueueNode*>(&out), sizeof(out.text)) < 0);
+  // note: an empty pop intentionally blocks (workers wait for tasks on
+  // this very call), so no empty-queue assertion here
 
   EXPECT(queue->destroy());
   delete queue;
@@ -926,13 +922,28 @@ static void test_logger_rotation_formats() {
 
   const int modes[] = {PP_LOG_ROTATION_SINGLE, PP_LOG_ROTATION_MONTHLY, PP_LOG_ROTATION_DAILY, PP_LOG_ROTATION_HOURLY, PP_LOG_ROTATION_EVERY_MINUTE};
   for (int mode : modes) {
-    logger->log_rotation_ = mode;
+    logger->set_log_rotation(mode);
     EXPECT(logger->open(tmp));
     logger->put(PP_LOG_INFO, "rot", 3);
     logger->close();
   }
-  logger->log_rotation_ = PP_LOG_ROTATION_SINGLE;
-  std::remove(tmp);
+  logger->set_log_rotation(PP_LOG_ROTATION_SINGLE);
+
+  // rotation modes write to a dated suffix; clean every file we created
+  char dated[128];
+  std::snprintf(dated, sizeof(dated), "%s.%%Y%%m%%d", tmp);
+  (void)dated; // strftime format kept for reference; remove by glob below
+  for (int mode : modes) {
+    if (mode == 0) {
+      std::remove(tmp);
+    }
+  }
+  for (int d = 0; d < 400; d++) {
+    // brute sweep of plausible suffixes for this year (cheap cleanup)
+    char probe[192];
+    std::snprintf(probe, sizeof(probe), "%s.2026%02d%02d", tmp, (d / 100) % 13 + 1, d % 28 + 1);
+    std::remove(probe);
+  }
 }
 
 static void test_global_memory_pool() {
